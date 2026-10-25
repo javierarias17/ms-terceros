@@ -1,0 +1,26 @@
+// ─────────────────────────────────────────────────────────────
+// infrastructure:entry-points:reactive-web — WebFlux entrypoints
+// ─────────────────────────────────────────────────────────────
+
+apply plugin: 'io.spring.dependency-management'
+
+dependencyManagement {
+    imports {
+        mavenBom org.springframework.boot.gradle.plugin.SpringBootPlugin.BOM_COORDINATES
+    }
+}
+
+dependencies {
+    implementation project(':domain:model')
+    implementation project(':domain:ports')
+    implementation project(':domain:usecases')
+
+    implementation libs.spring.boot.starter.webflux
+    implementation libs.spring.boot.starter.validation
+    implementation libs.spring.webflux
+    implementation libs.spring.context
+    implementation libs.reactor.core
+    implementation libs.jackson.databind
+    implementation libs.slf4j.api
+    implementation libs.springdoc.openapi.webflux.ui
+}

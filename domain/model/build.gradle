@@ -1,0 +1,9 @@
+// ─────────────────────────────────────────────────────────────
+// domain:model — Pure domain models, no framework dependencies
+// ─────────────────────────────────────────────────────────────
+
+dependencies {
+    implementation platform(libs.reactor.bom)
+    implementation libs.reactor.core
+    implementation libs.slf4j.api
+}

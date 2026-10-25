@@ -1,0 +1,9 @@
+// ─────────────────────────────────────────────────────────────
+// domain:ports — Port interfaces (outbound gateways)
+// ─────────────────────────────────────────────────────────────
+
+dependencies {
+    api project(':domain:model')
+    implementation platform(libs.reactor.bom)
+    implementation libs.reactor.core
+}

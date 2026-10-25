@@ -1,0 +1,32 @@
+// ─────────────────────────────────────────────────────────────
+// main.gradle — Quality & tooling configuration
+// Applied from root build.gradle
+// ─────────────────────────────────────────────────────────────
+
+subprojects {
+    afterEvaluate { project ->
+        if (project.plugins.hasPlugin('java-library') || project.plugins.hasPlugin('java')) {
+
+            // ── JaCoCo ──────────────────────────────────────
+            project.apply plugin: 'jacoco'
+
+            project.jacoco {
+                toolVersion = '0.8.12'
+            }
+
+            project.jacocoTestReport {
+                dependsOn project.tasks.test
+                reports {
+                    xml.required = true
+                    html.required = true
+                }
+            }
+
+            // ── MapStruct annotation processor ──────────────
+            project.dependencies {
+                compileOnly "org.mapstruct:mapstruct:1.5.5.Final"
+                annotationProcessor "org.mapstruct:mapstruct-processor:1.5.5.Final"
+            }
+        }
+    }
+}

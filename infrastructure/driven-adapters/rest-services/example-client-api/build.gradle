@@ -1,0 +1,23 @@
+// ─────────────────────────────────────────────────────────────
+// infrastructure:driven-adapters:rest-services:example-client-api
+// Sample REST driven-adapter: implements a domain:ports gateway using WebClient.
+// ─────────────────────────────────────────────────────────────
+
+apply plugin: 'io.spring.dependency-management'
+
+dependencyManagement {
+    imports {
+        mavenBom org.springframework.boot.gradle.plugin.SpringBootPlugin.BOM_COORDINATES
+    }
+}
+
+dependencies {
+    implementation project(':domain:model')
+    implementation project(':domain:ports')
+
+    implementation libs.spring.boot.starter.webflux
+    implementation libs.spring.context
+    implementation libs.reactor.core
+    implementation libs.jackson.databind
+    implementation libs.slf4j.api
+}

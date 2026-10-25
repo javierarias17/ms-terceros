@@ -1,0 +1,22 @@
+server:
+  port: 8080
+
+spring:
+  application:
+    name: ms-tercero
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,info
+  endpoint:
+    health:
+      probes:
+        enabled: true
+
+# Sample driven-adapter config — point it at the real upstream, or delete the
+# example-client-api module once the real adapters (e.g. Azure Document Intelligence) are in.
+thirdparty:
+  client:
+    base-url: ${THIRDPARTY_CLIENT_BASE_URL:http://localhost:9090}

@@ -1,0 +1,53 @@
+plugins {
+    id 'java'
+    alias(libs.plugins.spring.boot) apply false
+    alias(libs.plugins.spring.dependency.management) apply false
+}
+
+apply from: 'main.gradle'
+
+allprojects {
+    repositories {
+        mavenCentral()
+    }
+}
+
+subprojects { sub ->
+    if (sub.buildFile.exists()) {
+        apply plugin: 'java-library'
+
+        group = property('group')
+        version = property('version')
+
+        java {
+            sourceCompatibility = JavaVersion.VERSION_21
+            targetCompatibility = JavaVersion.VERSION_21
+        }
+
+        repositories {
+            mavenCentral()
+        }
+
+        dependencies {
+            compileOnly libs.lombok
+            annotationProcessor libs.lombok
+            testCompileOnly libs.lombok
+            testAnnotationProcessor libs.lombok
+
+            testImplementation libs.junit.jupiter
+            testImplementation libs.reactor.test
+            testImplementation libs.bundles.mockito
+            testImplementation libs.assertj.core
+            testRuntimeOnly 'org.junit.platform:junit-platform-launcher'
+        }
+
+        tasks.withType(JavaCompile).configureEach {
+            options.encoding = 'UTF-8'
+            options.compilerArgs += ['-parameters']
+        }
+
+        test {
+            useJUnitPlatform()
+        }
+    }
+}
