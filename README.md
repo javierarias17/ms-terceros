@@ -1,9 +1,15 @@
 # ms-tercero
 
-Base de un microservicio en **arquitectura hexagonal** (ports & adapters): dominio puro
-(`domain/model`, `domain/ports`, `domain/usecases`) desacoplado de los frameworks, e infraestructura
-que implementa esos ports (`infrastructure/driven-adapters`) y expone la API
-(`infrastructure/entry-points`).
+Microservicio en **arquitectura hexagonal** (ports & adapters) que valida los documentos
+(cédula, RUT) que un tercero carga en el formulario de `frontend/universidad-boques-terceros`,
+usando tres modelos personalizados de Azure AI Document Intelligence: un clasificador de
+documentos y dos extractores de campos (uno por tipo de documento).
+
+Dos validaciones por documento:
+1. **Tipo de documento**: el clasificador confirma que el PDF cargado sea realmente del tipo
+   esperado (p. ej. que lo subido como "cédula" sea una cédula y no un RUT).
+2. **Campos del documento**: si el tipo coincide, el extractor correspondiente lee sus campos y
+   se comparan contra lo que la persona escribió en el formulario.
 
 Pensado para desplegarse en Azure fuera de AKS (p. ej. Azure Container Apps o App Service for
 Containers), por eso **no incluye** contratos OpenAPI contract-first con codegen, Helm charts ni
@@ -13,49 +19,89 @@ pipelines de CI/CD — se agregan según el mecanismo de despliegue que elijas.
 
 ```
 domain/
-  model/      → entidades y excepciones de dominio, sin dependencias de frameworks
-  ports/      → interfaces de los gateways salientes (lo que el dominio necesita del exterior)
-  usecases/   → orquestación de negocio: clases planas (sin @Service), reciben sus ports por constructor
+  model/      → DocumentType, ApplicantType, DocumentValidationRequest/Result, FieldComparison
+  ports/      → IDocumentClassifierGateway, IDocumentExtractorGateway
+  usecases/   → ValidateDocumentUseCase: clasifica, compara tipo, extrae y compara campos
 
 infrastructure/
   driven-adapters/
-    rest-services/example-client-api/   → implementación de ejemplo de un port vía WebClient
+    rest-services/azure-document-intelligence-client/   → llama al clasificador y a los 2
+                                                            extractores de Azure Document Intelligence
+                                                            (maneja el polling asíncrono de su API)
   entry-points/
-    reactive-web/                       → controladores WebFlux, manejo global de excepciones, OpenAPI
+    reactive-web/   → POST /v1/document-validations (multipart), manejo global de excepciones, OpenAPI
 
 application/
-  app-service/   → arranque de Spring Boot + wiring de beans de los use cases (config/UseCaseBeanConfig)
+  app-service/   → arranque de Spring Boot + wiring de beans (config/UseCaseBeanConfig,
+                    config/RutValidationProperties)
 ```
 
 Regla de dependencia: `domain` no depende de nada externo; `infrastructure` depende de `domain`
 (implementa sus ports); `application` ensambla todo y es el único módulo con `@SpringBootApplication`.
 
-## Lo que es solo un ejemplo a reemplazar
+## Endpoint
 
-`ThirdParty` / `IThirdPartyGateway` / `GetThirdPartyUseCase` / `ThirdPartyGatewayAdapter` /
-`ThirdPartyController` son un flujo de punta a punta de muestra para que quede claro el patrón.
-Bórralos cuando agregues los casos de uso reales (p. ej. un adapter que llame a tus proyectos de
-Azure AI Document Intelligence):
+`POST /v1/document-validations` — multipart/form-data:
 
-1. Crea el modelo en `domain/model`.
-2. Define el port (interfaz) en `domain/ports`.
-3. Implementa el use case en `domain/usecases` (clase plana, sin anotaciones de Spring).
-4. Crea el módulo adapter en `infrastructure/driven-adapters/rest-services/<nombre>` con su
-   `WebClient`/SDK de Azure, anotado `@Component` para que Spring lo descubra.
-5. Expón el endpoint en `infrastructure/entry-points/reactive-web`.
-6. Registra el bean del use case en `application/app-service/.../config/UseCaseBeanConfig.java` y
-   agrega el `implementation project(...)` del nuevo módulo en `application/app-service/build.gradle`
-   y en `settings.gradle`.
+| Parte | Obligatorio | Descripción |
+|---|---|---|
+| `file` | sí | el PDF a validar |
+| `expectedDocumentType` | sí | `CEDULA` o `RUT` |
+| `numeroDocumento` | solo para `CEDULA` | número de cédula escrito en el formulario |
+| `nombreCompleto` | solo para `CEDULA` | nombre completo escrito en el formulario |
+| `applicantType` | solo para `RUT` | `NATURAL` o `JURIDICA` (según el campo "Persona" del formulario) |
+
+Respuesta:
+```json
+{
+  "documentType": { "expected": "CEDULA", "detected": "CEDULA", "match": true },
+  "fields": [
+    { "field": "numeroDocumento", "formValue": "123456789", "documentValue": "123456789", "match": true },
+    { "field": "nombreCompleto", "formValue": "Ana Gomez", "documentValue": "ANA GOMEZ", "match": true }
+  ],
+  "valid": true
+}
+```
+
+Campos que compara cada tipo de documento (ver `ValidateDocumentUseCase`):
+- **CEDULA**: `cedula_numero` contra `numeroDocumento`; `cedula_nombres` + `cedula_apellidos`
+  (comparación por conjunto de palabras, sin tildes ni mayúsculas) contra `nombreCompleto`.
+- **RUT**: `tipo_contribuyente` contra el texto esperado según `applicantType`
+  (`rut-validation.tipo-contribuyente-natural` / `tipo-contribuyente-juridica` en `application.yml`).
+
+Umbral de confianza (`azure.document-intelligence.min-confidence`, por defecto `0.85`): si la
+clasificación o un campo extraído viene con menos confianza que eso, se descarta — la clasificación
+pasa a `UNKNOWN` (fuerza rechazo en la validación 1) y el campo queda como no extraído (fuerza
+rechazo en la validación 2), en vez de confiar en un resultado dudoso de Azure.
 
 ## Configuración local
 
-`application.yml` está en `.gitignore` (vas a meter ahí endpoints/keys reales, p. ej. de Azure
-Document Intelligence). Antes de correr el servicio, cópialo desde la plantilla:
+`application.yml` está en `.gitignore` porque ahí van las credenciales reales de Azure. Antes de
+correr el servicio, cópialo desde la plantilla y completa los valores:
 
 ```bash
 cp application/app-service/src/main/resources/application.yml.example \
    application/app-service/src/main/resources/application.yml
 ```
+
+Lo que necesitas del recurso de Azure AI Document Intelligence (Portal → tu recurso →
+**"Keys and Endpoint"**, y Document Intelligence Studio para los nombres de los modelos):
+
+| Propiedad | De dónde sale |
+|---|---|
+| `azure.document-intelligence.endpoint` | Endpoint del recurso |
+| `azure.document-intelligence.api-key` | Una de las dos keys del recurso |
+| `azure.document-intelligence.classifier.model-id` | Nombre del modelo clasificador en el Studio |
+| `azure.document-intelligence.classifier.label-cedula` / `label-rut` | Etiquetas que devuelve el clasificador para cada tipo |
+| `azure.document-intelligence.models.cedula-model-id` / `rut-model-id` | Nombre de cada modelo extractor en el Studio |
+
+## Frontend
+
+`frontend/universidad-boques-terceros/terceros.html` ya llama a este endpoint para los documentos
+de cédula y RUT (`tipoDocumentoConModelo` en su script). El resto de documentos del catálogo
+(cámara de comercio, certificación bancaria, etc.) sigue mostrándose como **"Simulado"** hasta que
+existan sus modelos. Si el backend corre en otro host/puerto, ajusta `API_BASE_URL` en ese mismo
+script.
 
 ## Comandos
 

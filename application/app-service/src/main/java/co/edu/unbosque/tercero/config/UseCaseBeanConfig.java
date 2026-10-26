@@ -1,7 +1,9 @@
 package co.edu.unbosque.tercero.config;
 
-import co.edu.unbosque.tercero.domain.ports.IThirdPartyGateway;
-import co.edu.unbosque.tercero.domain.usecases.GetThirdPartyUseCase;
+import co.edu.unbosque.tercero.domain.ports.IDocumentClassifierGateway;
+import co.edu.unbosque.tercero.domain.ports.IDocumentExtractorGateway;
+import co.edu.unbosque.tercero.domain.usecases.ValidateDocumentUseCase;
+import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
@@ -14,10 +16,19 @@ import org.springframework.context.annotation.Configuration;
  * </p>
  */
 @Configuration
+@RequiredArgsConstructor
 public class UseCaseBeanConfig {
 
+    private final RutValidationProperties rutValidationProperties;
+
     @Bean
-    public GetThirdPartyUseCase getThirdPartyUseCase(IThirdPartyGateway thirdPartyGateway) {
-        return new GetThirdPartyUseCase(thirdPartyGateway);
+    public ValidateDocumentUseCase validateDocumentUseCase(
+            IDocumentClassifierGateway documentClassifierGateway,
+            IDocumentExtractorGateway documentExtractorGateway) {
+        return new ValidateDocumentUseCase(
+                documentClassifierGateway,
+                documentExtractorGateway,
+                rutValidationProperties.getTipoContribuyenteNatural(),
+                rutValidationProperties.getTipoContribuyenteJuridica());
     }
 }

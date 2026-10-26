@@ -22,7 +22,7 @@ dependencies {
     implementation project(':domain:usecases')
 
     // Infrastructure — Driven Adapters
-    implementation project(':infrastructure:driven-adapters:rest-services:example-client-api')
+    implementation project(':infrastructure:driven-adapters:rest-services:azure-document-intelligence-client')
 
     // Infrastructure — Entry Points
     implementation project(':infrastructure:entry-points:reactive-web')

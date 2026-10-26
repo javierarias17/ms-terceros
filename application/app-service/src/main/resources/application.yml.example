@@ -4,6 +4,9 @@ server:
 spring:
   application:
     name: ms-tercero
+  webflux:
+    multipart:
+      max-in-memory-size: 10MB
 
 management:
   endpoints:
@@ -15,8 +18,27 @@ management:
       probes:
         enabled: true
 
-# Sample driven-adapter config — point it at the real upstream, or delete the
-# example-client-api module once the real adapters (e.g. Azure Document Intelligence) are in.
-thirdparty:
-  client:
-    base-url: ${THIRDPARTY_CLIENT_BASE_URL:http://localhost:9090}
+# Azure AI Document Intelligence — Portal del recurso > "Keys and Endpoint" para endpoint/api-key.
+# Los model-id son los nombres de los modelos tal como aparecen en Document Intelligence Studio.
+azure:
+  document-intelligence:
+    endpoint: ${AZURE_DOCUMENT_INTELLIGENCE_ENDPOINT:}
+    api-key: ${AZURE_DOCUMENT_INTELLIGENCE_KEY:}
+    api-version: 2024-11-30
+    min-confidence: 0.85
+    classifier:
+      model-id: ${AZURE_DOCUMENT_INTELLIGENCE_CLASSIFIER_MODEL_ID:}
+      label-cedula: cedula
+      label-rut: rut
+    models:
+      cedula-model-id: ${AZURE_DOCUMENT_INTELLIGENCE_CEDULA_MODEL_ID:}
+      rut-model-id: ${AZURE_DOCUMENT_INTELLIGENCE_RUT_MODEL_ID:}
+    polling:
+      interval-millis: 2000
+      max-attempts: 30
+
+# Texto exacto que el modelo de RUT devuelve en el campo tipo_contribuyente para cada tipo de
+# solicitante. Ajusta si tu modelo usa otro texto.
+rut-validation:
+  tipo-contribuyente-natural: Persona Natural
+  tipo-contribuyente-juridica: Persona Jurídica

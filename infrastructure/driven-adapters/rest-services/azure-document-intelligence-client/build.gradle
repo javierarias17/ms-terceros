@@ -1,6 +1,6 @@
 // ─────────────────────────────────────────────────────────────
-// infrastructure:driven-adapters:rest-services:example-client-api
-// Sample REST driven-adapter: implements a domain:ports gateway using WebClient.
+// infrastructure:driven-adapters:rest-services:azure-document-intelligence-client
+// Calls the Azure AI Document Intelligence custom classifier and extraction models.
 // ─────────────────────────────────────────────────────────────
 
 apply plugin: 'io.spring.dependency-management'
