@@ -46,3 +46,7 @@ application-local.yaml
 
 # Test output
 /test-output/
+
+# IaC — parámetros reales (pueden traer rutas/nombres sensibles); usa infra/main.parameters.example.json
+infra/main.parameters.json
+infra/*.local.json
