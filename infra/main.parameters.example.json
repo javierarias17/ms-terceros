@@ -9,7 +9,7 @@
     "containerAppName": { "value": "ms-tercero-api" },
     "azureDocumentIntelligenceEndpoint": { "value": "https://docs-inteligence-24-10.cognitiveservices.azure.com/" },
     "azureDocumentIntelligenceClassifierModelId": { "value": "model1" },
-    "azureDocumentIntelligenceCedulaModelId": { "value": "model_1" },
+    "azureDocumentIntelligenceCedulaModelId": { "value": "model_2" },
     "azureDocumentIntelligenceRutModelId": { "value": "model_1" },
     "rutValidationTipoContribuyenteNatural": { "value": "Persona natural o sucesión ilíquida" },
     "rutValidationTipoContribuyenteJuridica": { "value": "Persona Jurídica" },

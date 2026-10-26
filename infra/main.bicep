@@ -32,7 +32,7 @@ param azureDocumentIntelligenceKey string
 param azureDocumentIntelligenceClassifierModelId string = 'model1'
 
 @description('Nombre del modelo extractor de cédula en Document Intelligence Studio')
-param azureDocumentIntelligenceCedulaModelId string = 'model_1'
+param azureDocumentIntelligenceCedulaModelId string = 'model_2'
 
 @description('Nombre del modelo extractor de RUT en Document Intelligence Studio')
 param azureDocumentIntelligenceRutModelId string = 'model_1'
