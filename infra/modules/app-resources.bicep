@@ -98,10 +98,10 @@ resource containerApp 'Microsoft.App/containerApps@2024-03-01' = {
           }
           env: [
             { name: 'AZURE_DOCUMENT_INTELLIGENCE_ENDPOINT', value: azureDocumentIntelligenceEndpoint }
-            { name: 'AZURE_DOCUMENT_INTELLIGENCE_KEY', secretRef: 'doc-intel-key' }
+            { name: 'AZURE_DOCUMENT_INTELLIGENCE_API_KEY', secretRef: 'doc-intel-key' }
             { name: 'AZURE_DOCUMENT_INTELLIGENCE_CLASSIFIER_MODEL_ID', value: azureDocumentIntelligenceClassifierModelId }
-            { name: 'AZURE_DOCUMENT_INTELLIGENCE_CEDULA_MODEL_ID', value: azureDocumentIntelligenceCedulaModelId }
-            { name: 'AZURE_DOCUMENT_INTELLIGENCE_RUT_MODEL_ID', value: azureDocumentIntelligenceRutModelId }
+            { name: 'AZURE_DOCUMENT_INTELLIGENCE_MODELS_CEDULA_MODEL_ID', value: azureDocumentIntelligenceCedulaModelId }
+            { name: 'AZURE_DOCUMENT_INTELLIGENCE_MODELS_RUT_MODEL_ID', value: azureDocumentIntelligenceRutModelId }
             { name: 'RUT_VALIDATION_TIPO_CONTRIBUYENTE_NATURAL', value: rutValidationTipoContribuyenteNatural }
             { name: 'RUT_VALIDATION_TIPO_CONTRIBUYENTE_JURIDICA', value: rutValidationTipoContribuyenteJuridica }
           ]
