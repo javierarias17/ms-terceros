@@ -3,8 +3,8 @@
 // Pensado para poder replicarse igual en otra cuenta corriendo un solo comando.
 targetScope = 'subscription'
 
-@description('Ubicación para todos los recursos. Algunas suscripciones (ej. Azure for Students) restringen las regiones permitidas por política: revisa "az policy assignment list" si el despliegue falla con RequestDisallowedByAzure.')
-param location string = 'westus2'
+@description('Ubicación para todos los recursos. Algunas suscripciones (ej. Azure for Students) restringen las regiones permitidas por política: revisa "az policy assignment list" si el despliegue falla con RequestDisallowedByAzure. Se eligió belgiumcentral porque, de las regiones permitidas en esta suscripción, es la única que queda fuera del rollout de Azure Container Apps "Express" (ver infra/README o el tema de estudio sobre IaC/CI-CD): Express no soporta pull de imágenes privadas del ACR, ni identidad administrada del sistema, ni revisionSuffix.')
+param location string = 'belgiumcentral'
 
 @description('Nombre del resource group')
 param resourceGroupName string = 'rg-ms-tercero'
