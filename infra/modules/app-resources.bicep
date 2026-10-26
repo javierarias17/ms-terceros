@@ -15,6 +15,7 @@ param azureDocumentIntelligenceCedulaModelId string
 param azureDocumentIntelligenceRutModelId string
 param rutValidationTipoContribuyenteNatural string
 param rutValidationTipoContribuyenteJuridica string
+param azureDocumentIntelligenceMinConfidence string
 
 resource acr 'Microsoft.ContainerRegistry/registries@2023-07-01' = {
   name: acrName
@@ -104,6 +105,7 @@ resource containerApp 'Microsoft.App/containerApps@2024-03-01' = {
             { name: 'AZURE_DOCUMENT_INTELLIGENCE_MODELS_RUT_MODEL_ID', value: azureDocumentIntelligenceRutModelId }
             { name: 'RUT_VALIDATION_TIPO_CONTRIBUYENTE_NATURAL', value: rutValidationTipoContribuyenteNatural }
             { name: 'RUT_VALIDATION_TIPO_CONTRIBUYENTE_JURIDICA', value: rutValidationTipoContribuyenteJuridica }
+            { name: 'AZURE_DOCUMENT_INTELLIGENCE_MIN_CONFIDENCE', value: azureDocumentIntelligenceMinConfidence }
           ]
         }
       ]

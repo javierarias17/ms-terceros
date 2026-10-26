@@ -43,6 +43,9 @@ param rutValidationTipoContribuyenteNatural string = 'Persona natural o sucesió
 @description('Texto exacto que el modelo de RUT devuelve en tipo_contribuyente para persona jurídica')
 param rutValidationTipoContribuyenteJuridica string = 'Persona Jurídica'
 
+@description('Confianza mínima (0-1) que Azure Document Intelligence debe reportar para aceptar una clasificación o un campo extraído. Bajado de 0.85 a 0.80 tras ver en producción un RUT real clasificado con 0.81 de confianza.')
+param azureDocumentIntelligenceMinConfidence string = '0.80'
+
 resource rg 'Microsoft.Resources/resourceGroups@2024-03-01' = {
   name: resourceGroupName
   location: location
@@ -64,6 +67,7 @@ module appResources 'modules/app-resources.bicep' = {
     azureDocumentIntelligenceRutModelId: azureDocumentIntelligenceRutModelId
     rutValidationTipoContribuyenteNatural: rutValidationTipoContribuyenteNatural
     rutValidationTipoContribuyenteJuridica: rutValidationTipoContribuyenteJuridica
+    azureDocumentIntelligenceMinConfidence: azureDocumentIntelligenceMinConfidence
   }
 }
 
