@@ -7,32 +7,28 @@ import co.edu.unbosque.tercero.domain.model.DocumentValidationResult;
 import co.edu.unbosque.tercero.domain.usecases.ValidateDocumentUseCase;
 import lombok.RequiredArgsConstructor;
 import org.springframework.core.io.buffer.DataBufferUtils;
-import org.springframework.http.MediaType;
 import org.springframework.http.codec.multipart.FilePart;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestPart;
 import org.springframework.web.bind.annotation.RestController;
 import reactor.core.publisher.Mono;
 
 /**
  * Validates a cédula or RUT uploaded by the applicant: confirms it is really the expected
- * document type and, if so, that its fields match the values entered in the form.
+ * document type and, if so, that its fields match the values entered in the form. The public
+ * contract (path, parameters, OpenAPI docs) lives in {@link DocumentValidationApi}.
  */
 @RestController
 @RequiredArgsConstructor
-@RequestMapping("/v1/document-validations")
-public class DocumentValidationController {
+public class DocumentValidationController implements DocumentValidationApi {
 
     private final ValidateDocumentUseCase validateDocumentUseCase;
 
-    @PostMapping(consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+    @Override
     public Mono<DocumentValidationResponseDto> validate(
-            @RequestPart("file") FilePart file,
-            @RequestPart("expectedDocumentType") String expectedDocumentTypeRaw,
-            @RequestPart(value = "numeroDocumento", required = false) String numeroDocumento,
-            @RequestPart(value = "nombreCompleto", required = false) String nombreCompleto,
-            @RequestPart(value = "applicantType", required = false) String applicantTypeRaw) {
+            FilePart file,
+            String expectedDocumentTypeRaw,
+            String numeroDocumento,
+            String nombreCompleto,
+            String applicantTypeRaw) {
 
         DocumentType expectedDocumentType = parseDocumentType(expectedDocumentTypeRaw);
         ApplicantType applicantType = parseApplicantType(applicantTypeRaw);
