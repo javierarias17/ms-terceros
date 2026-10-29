@@ -23,6 +23,7 @@ dependencies {
 
     // Infrastructure — Driven Adapters
     implementation project(':infrastructure:driven-adapters:rest-services:azure-document-intelligence-client')
+    implementation project(':infrastructure:driven-adapters:rest-services:sendgrid-client')
 
     // Infrastructure — Entry Points
     implementation project(':infrastructure:entry-points:reactive-web')

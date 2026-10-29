@@ -46,6 +46,16 @@ param rutValidationTipoContribuyenteJuridica string = 'Persona Jurídica'
 @description('Confianza mínima (0-1) que Azure Document Intelligence debe reportar para aceptar una clasificación o un campo extraído. Bajado de 0.85 a 0.80 tras ver en producción un RUT real clasificado con 0.81 de confianza.')
 param azureDocumentIntelligenceMinConfidence string = '0.80'
 
+@secure()
+@description('API key de SendGrid (Settings > API Keys). Nunca se guarda en un archivo del repo: se pasa en el momento del despliegue.')
+param sendGridApiKey string
+
+@description('Remitente verificado en SendGrid (Settings > Sender Authentication). El envío falla si no está verificado.')
+param sendGridFromEmail string
+
+@description('Nombre que aparece como remitente en el correo de confirmación.')
+param sendGridFromName string = 'Universidad El Bosque'
+
 resource rg 'Microsoft.Resources/resourceGroups@2024-03-01' = {
   name: resourceGroupName
   location: location
@@ -68,6 +78,9 @@ module appResources 'modules/app-resources.bicep' = {
     rutValidationTipoContribuyenteNatural: rutValidationTipoContribuyenteNatural
     rutValidationTipoContribuyenteJuridica: rutValidationTipoContribuyenteJuridica
     azureDocumentIntelligenceMinConfidence: azureDocumentIntelligenceMinConfidence
+    sendGridApiKey: sendGridApiKey
+    sendGridFromEmail: sendGridFromEmail
+    sendGridFromName: sendGridFromName
   }
 }
 

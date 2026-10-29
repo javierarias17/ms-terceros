@@ -2,6 +2,8 @@ package co.edu.unbosque.tercero.config;
 
 import co.edu.unbosque.tercero.domain.ports.IDocumentClassifierGateway;
 import co.edu.unbosque.tercero.domain.ports.IDocumentExtractorGateway;
+import co.edu.unbosque.tercero.domain.ports.IEmailNotificationGateway;
+import co.edu.unbosque.tercero.domain.usecases.SendRegistrationConfirmationUseCase;
 import co.edu.unbosque.tercero.domain.usecases.ValidateDocumentUseCase;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;
@@ -30,5 +32,11 @@ public class UseCaseBeanConfig {
                 documentExtractorGateway,
                 rutValidationProperties.getTipoContribuyenteNatural(),
                 rutValidationProperties.getTipoContribuyenteJuridica());
+    }
+
+    @Bean
+    public SendRegistrationConfirmationUseCase sendRegistrationConfirmationUseCase(
+            IEmailNotificationGateway emailNotificationGateway) {
+        return new SendRegistrationConfirmationUseCase(emailNotificationGateway);
     }
 }

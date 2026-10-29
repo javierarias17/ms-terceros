@@ -17,6 +17,12 @@ param rutValidationTipoContribuyenteNatural string
 param rutValidationTipoContribuyenteJuridica string
 param azureDocumentIntelligenceMinConfidence string
 
+@secure()
+param sendGridApiKey string
+
+param sendGridFromEmail string
+param sendGridFromName string
+
 resource acr 'Microsoft.ContainerRegistry/registries@2023-07-01' = {
   name: acrName
   location: location
@@ -86,6 +92,10 @@ resource containerApp 'Microsoft.App/containerApps@2024-03-01' = {
           name: 'acr-password'
           value: acr.listCredentials().passwords[0].value
         }
+        {
+          name: 'sendgrid-api-key'
+          value: sendGridApiKey
+        }
       ]
     }
     template: {
@@ -106,6 +116,9 @@ resource containerApp 'Microsoft.App/containerApps@2024-03-01' = {
             { name: 'RUT_VALIDATION_TIPO_CONTRIBUYENTE_NATURAL', value: rutValidationTipoContribuyenteNatural }
             { name: 'RUT_VALIDATION_TIPO_CONTRIBUYENTE_JURIDICA', value: rutValidationTipoContribuyenteJuridica }
             { name: 'AZURE_DOCUMENT_INTELLIGENCE_MIN_CONFIDENCE', value: azureDocumentIntelligenceMinConfidence }
+            { name: 'SENDGRID_API_KEY', secretRef: 'sendgrid-api-key' }
+            { name: 'SENDGRID_FROM_EMAIL', value: sendGridFromEmail }
+            { name: 'SENDGRID_FROM_NAME', value: sendGridFromName }
           ]
         }
       ]

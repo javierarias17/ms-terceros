@@ -42,3 +42,10 @@ azure:
 rut-validation:
   tipo-contribuyente-natural: Persona Natural
   tipo-contribuyente-juridica: Persona Jurídica
+
+# SendGrid — Settings > API Keys para la api-key. from-email debe ser un remitente verificado
+# en SendGrid (Settings > Sender Authentication), si no el envío falla.
+sendgrid:
+  api-key: ${SENDGRID_API_KEY:}
+  from-email: ${SENDGRID_FROM_EMAIL:}
+  from-name: ${SENDGRID_FROM_NAME:Universidad El Bosque}
