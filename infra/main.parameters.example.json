@@ -11,8 +11,6 @@
     "azureDocumentIntelligenceClassifierModelId": { "value": "model1" },
     "azureDocumentIntelligenceCedulaModelId": { "value": "model_2" },
     "azureDocumentIntelligenceRutModelId": { "value": "model_1" },
-    "rutValidationTipoContribuyenteNatural": { "value": "Persona natural o sucesión ilíquida" },
-    "rutValidationTipoContribuyenteJuridica": { "value": "Persona Jurídica" },
     "azureDocumentIntelligenceMinConfidence": { "value": "0.80" },
     "sendGridFromEmail": { "value": "no-reply@tudominio.com" },
     "sendGridFromName": { "value": "Universidad El Bosque" },

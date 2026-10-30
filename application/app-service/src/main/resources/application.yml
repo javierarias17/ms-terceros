@@ -1,0 +1,67 @@
+server:
+  port: 8080
+
+spring:
+  application:
+    name: ms-tercero
+  webflux:
+    multipart:
+      max-in-memory-size: 10MB
+  # schema.sql crea/actualiza las tablas de tercero. "always" porque con R2DBC (no es una base
+  # embebida) Spring Boot no lo corre automáticamente por defecto.
+  sql:
+    init:
+      mode: always
+  r2dbc:
+    url: ${POSTGRES_R2DBC_URL:r2dbc:postgresql://localhost:5432/ms_tercero}
+    username: ${POSTGRES_USERNAME:}
+    password: ${POSTGRES_PASSWORD:}
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,info
+  endpoint:
+    health:
+      probes:
+        enabled: true
+
+# Azure AI Document Intelligence — Portal del recurso > "Keys and Endpoint" para endpoint/api-key.
+# Los model-id son los nombres de los modelos tal como aparecen en Document Intelligence Studio.
+azure:
+  document-intelligence:
+    endpoint: ${AZURE_DOCUMENT_INTELLIGENCE_ENDPOINT:}
+    api-key: ${AZURE_DOCUMENT_INTELLIGENCE_API_KEY:}
+    api-version: 2024-11-30
+    min-confidence: ${AZURE_DOCUMENT_INTELLIGENCE_MIN_CONFIDENCE:0.80}
+    classifier:
+      model-id: ${AZURE_DOCUMENT_INTELLIGENCE_CLASSIFIER_MODEL_ID:}
+      label-cedula: cedula
+      label-rut: rut
+    models:
+      cedula-model-id: ${AZURE_DOCUMENT_INTELLIGENCE_MODELS_CEDULA_MODEL_ID:}
+      rut-model-id: ${AZURE_DOCUMENT_INTELLIGENCE_MODELS_RUT_MODEL_ID:}
+    polling:
+      interval-millis: 2000
+      max-attempts: 30
+
+# Texto exacto que el modelo de RUT devuelve en el campo tipo_contribuyente para cada tipo de
+# solicitante. Valor fijo (no viene de una variable de entorno): en la imagen Alpine la JVM
+# decodifica mal los acentos de las env vars (bug conocido de musl con sun.jnu.encoding), así
+# que este texto se lee directo del YAML (UTF-8 real) en vez de pasar por esa decodificación.
+rut-validation:
+  tipo-contribuyente-natural: Persona natural o sucesión ilíquida
+  tipo-contribuyente-juridica: Persona Jurídica
+
+# SendGrid — Settings > API Keys para la api-key. from-email debe ser un remitente verificado
+# en SendGrid (Settings > Sender Authentication), si no el envío falla.
+sendgrid:
+  api-key: ${SENDGRID_API_KEY:}
+  from-email: ${SENDGRID_FROM_EMAIL:}
+  from-name: ${SENDGRID_FROM_NAME:Universidad El Bosque}
+
+# Azure Blob Storage — Portal del Storage Account > "Access keys" para la connection string.
+blob-storage:
+  connection-string: ${BLOB_STORAGE_CONNECTION_STRING:}
+  container-name: ${BLOB_STORAGE_CONTAINER_NAME:tercero-documents}

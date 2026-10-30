@@ -37,10 +37,11 @@ Thumbs.db
 *.log
 
 # Environment / secrets
+# application.yml SÍ se versiona (solo tiene placeholders ${VAR:...}, sin secretos reales) —
+# es el que realmente empaqueta el jar; si se ignora, el deploy queda sin ninguna configuración.
+# Los valores reales para correr local van en application-local.yml (gitignorado) + perfil "local".
 .env
 .env.local
-application.yml
-application.yaml
 application-local.yml
 application-local.yaml
 

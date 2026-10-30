@@ -37,11 +37,9 @@ param azureDocumentIntelligenceCedulaModelId string = 'model_2'
 @description('Nombre del modelo extractor de RUT en Document Intelligence Studio')
 param azureDocumentIntelligenceRutModelId string = 'model_1'
 
-@description('Texto exacto que el modelo de RUT devuelve en tipo_contribuyente para persona natural')
-param rutValidationTipoContribuyenteNatural string = 'Persona natural o sucesión ilíquida'
-
-@description('Texto exacto que el modelo de RUT devuelve en tipo_contribuyente para persona jurídica')
-param rutValidationTipoContribuyenteJuridica string = 'Persona Jurídica'
+// El texto de tipo_contribuyente (natural/jurídica) ya no se pasa por variable de entorno:
+// en la imagen Alpine la JVM decodifica mal los acentos de las env vars (bug de musl con
+// sun.jnu.encoding). Ahora es un valor fijo en application.yml, leído directo del YAML (UTF-8).
 
 @description('Confianza mínima (0-1) que Azure Document Intelligence debe reportar para aceptar una clasificación o un campo extraído. Bajado de 0.85 a 0.80 tras ver en producción un RUT real clasificado con 0.81 de confianza.')
 param azureDocumentIntelligenceMinConfidence string = '0.80'
@@ -97,8 +95,6 @@ module appResources 'modules/app-resources.bicep' = {
     azureDocumentIntelligenceClassifierModelId: azureDocumentIntelligenceClassifierModelId
     azureDocumentIntelligenceCedulaModelId: azureDocumentIntelligenceCedulaModelId
     azureDocumentIntelligenceRutModelId: azureDocumentIntelligenceRutModelId
-    rutValidationTipoContribuyenteNatural: rutValidationTipoContribuyenteNatural
-    rutValidationTipoContribuyenteJuridica: rutValidationTipoContribuyenteJuridica
     azureDocumentIntelligenceMinConfidence: azureDocumentIntelligenceMinConfidence
     sendGridApiKey: sendGridApiKey
     sendGridFromEmail: sendGridFromEmail

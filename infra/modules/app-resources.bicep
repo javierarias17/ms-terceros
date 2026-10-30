@@ -13,8 +13,6 @@ param azureDocumentIntelligenceKey string
 param azureDocumentIntelligenceClassifierModelId string
 param azureDocumentIntelligenceCedulaModelId string
 param azureDocumentIntelligenceRutModelId string
-param rutValidationTipoContribuyenteNatural string
-param rutValidationTipoContribuyenteJuridica string
 param azureDocumentIntelligenceMinConfidence string
 
 @secure()
@@ -197,8 +195,6 @@ resource containerApp 'Microsoft.App/containerApps@2024-03-01' = {
             { name: 'AZURE_DOCUMENT_INTELLIGENCE_CLASSIFIER_MODEL_ID', value: azureDocumentIntelligenceClassifierModelId }
             { name: 'AZURE_DOCUMENT_INTELLIGENCE_MODELS_CEDULA_MODEL_ID', value: azureDocumentIntelligenceCedulaModelId }
             { name: 'AZURE_DOCUMENT_INTELLIGENCE_MODELS_RUT_MODEL_ID', value: azureDocumentIntelligenceRutModelId }
-            { name: 'RUT_VALIDATION_TIPO_CONTRIBUYENTE_NATURAL', value: rutValidationTipoContribuyenteNatural }
-            { name: 'RUT_VALIDATION_TIPO_CONTRIBUYENTE_JURIDICA', value: rutValidationTipoContribuyenteJuridica }
             { name: 'AZURE_DOCUMENT_INTELLIGENCE_MIN_CONFIDENCE', value: azureDocumentIntelligenceMinConfidence }
             { name: 'SENDGRID_API_KEY', secretRef: 'sendgrid-api-key' }
             { name: 'SENDGRID_FROM_EMAIL', value: sendGridFromEmail }
@@ -208,6 +204,22 @@ resource containerApp 'Microsoft.App/containerApps@2024-03-01' = {
             { name: 'POSTGRES_PASSWORD', secretRef: 'postgres-password' }
             { name: 'BLOB_STORAGE_CONNECTION_STRING', secretRef: 'storage-connection-string' }
             { name: 'BLOB_STORAGE_CONTAINER_NAME', value: blobContainerName }
+          ]
+          // El arranque real (Spring Data R2DBC + schema.sql contra Postgres real) tarda ~15s;
+          // sin esto, Container Apps usaba su probe de startup por defecto (demasiado agresivo)
+          // y mataba el contenedor antes de que el puerto llegara a abrirse.
+          probes: [
+            {
+              type: 'Startup'
+              httpGet: {
+                path: '/actuator/health'
+                port: 8080
+              }
+              initialDelaySeconds: 5
+              periodSeconds: 5
+              failureThreshold: 20
+              timeoutSeconds: 5
+            }
           ]
         }
       ]
