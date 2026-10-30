@@ -1,0 +1,23 @@
+// ─────────────────────────────────────────────────────────────
+// infrastructure:driven-adapters:repositories:postgres-tercero-repository
+// Persiste el registro de terceros en PostgreSQL vía R2DBC (reactivo, sin JPA/Hibernate).
+// ─────────────────────────────────────────────────────────────
+
+apply plugin: 'io.spring.dependency-management'
+
+dependencyManagement {
+    imports {
+        mavenBom org.springframework.boot.gradle.plugin.SpringBootPlugin.BOM_COORDINATES
+    }
+}
+
+dependencies {
+    implementation project(':domain:model')
+    implementation project(':domain:ports')
+
+    implementation libs.spring.boot.starter.data.r2dbc
+    implementation libs.r2dbc.postgresql
+    implementation libs.reactor.core
+    implementation libs.spring.context
+    implementation libs.slf4j.api
+}

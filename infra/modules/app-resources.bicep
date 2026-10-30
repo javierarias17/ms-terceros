@@ -23,6 +23,19 @@ param sendGridApiKey string
 param sendGridFromEmail string
 param sendGridFromName string
 
+@description('Región para PostgreSQL y Storage. Puede ser distinta de "location": no comparten el bug de Container Apps Express, así que si una región se queda sin capacidad para un recurso, la otra no se ve afectada.')
+param dataLocation string
+
+param postgresServerName string
+param postgresDatabaseName string
+param postgresAdminUsername string
+
+@secure()
+param postgresAdminPassword string
+
+param storageAccountName string
+param blobContainerName string
+
 resource acr 'Microsoft.ContainerRegistry/registries@2023-07-01' = {
   name: acrName
   location: location
@@ -35,6 +48,69 @@ resource acr 'Microsoft.ContainerRegistry/registries@2023-07-01' = {
     // aquí se usa el usuario/clave de administrador del propio ACR en vez de RBAC.
     adminUserEnabled: true
   }
+}
+
+resource postgresServer 'Microsoft.DBforPostgreSQL/flexibleServers@2023-06-01-preview' = {
+  name: postgresServerName
+  location: dataLocation
+  sku: {
+    // El SKU más barato (Burstable) — tiene costo recurrente, a diferencia de todo lo demás en
+    // este proyecto (Container Apps consumo, ACR, Document Intelligence F0, SendGrid gratis).
+    name: 'Standard_B1ms'
+    tier: 'Burstable'
+  }
+  properties: {
+    administratorLogin: postgresAdminUsername
+    administratorLoginPassword: postgresAdminPassword
+    version: '16'
+    storage: {
+      storageSizeGB: 32
+    }
+    backup: {
+      backupRetentionDays: 7
+      geoRedundantBackup: 'Disabled'
+    }
+    highAvailability: {
+      mode: 'Disabled'
+    }
+  }
+}
+
+resource postgresDatabase 'Microsoft.DBforPostgreSQL/flexibleServers/databases@2023-06-01-preview' = {
+  parent: postgresServer
+  name: postgresDatabaseName
+}
+
+resource postgresFirewallAllowAzure 'Microsoft.DBforPostgreSQL/flexibleServers/firewallRules@2023-06-01-preview' = {
+  parent: postgresServer
+  name: 'AllowAllAzureServices'
+  properties: {
+    startIpAddress: '0.0.0.0'
+    endIpAddress: '0.0.0.0'
+  }
+}
+
+resource storageAccount 'Microsoft.Storage/storageAccounts@2023-01-01' = {
+  name: storageAccountName
+  location: dataLocation
+  kind: 'StorageV2'
+  sku: {
+    name: 'Standard_LRS'
+  }
+  properties: {
+    minimumTlsVersion: 'TLS1_2'
+    allowBlobPublicAccess: false
+  }
+}
+
+resource blobService 'Microsoft.Storage/storageAccounts/blobServices@2023-01-01' = {
+  parent: storageAccount
+  name: 'default'
+}
+
+resource blobContainer 'Microsoft.Storage/storageAccounts/blobServices/containers@2023-01-01' = {
+  parent: blobService
+  name: blobContainerName
 }
 
 resource logAnalytics 'Microsoft.OperationalInsights/workspaces@2023-09-01' = {
@@ -96,6 +172,14 @@ resource containerApp 'Microsoft.App/containerApps@2024-03-01' = {
           name: 'sendgrid-api-key'
           value: sendGridApiKey
         }
+        {
+          name: 'postgres-password'
+          value: postgresAdminPassword
+        }
+        {
+          name: 'storage-connection-string'
+          value: 'DefaultEndpointsProtocol=https;AccountName=${storageAccount.name};AccountKey=${storageAccount.listKeys().keys[0].value};EndpointSuffix=core.windows.net'
+        }
       ]
     }
     template: {
@@ -119,6 +203,11 @@ resource containerApp 'Microsoft.App/containerApps@2024-03-01' = {
             { name: 'SENDGRID_API_KEY', secretRef: 'sendgrid-api-key' }
             { name: 'SENDGRID_FROM_EMAIL', value: sendGridFromEmail }
             { name: 'SENDGRID_FROM_NAME', value: sendGridFromName }
+            { name: 'POSTGRES_R2DBC_URL', value: 'r2dbc:postgresql://${postgresServer.properties.fullyQualifiedDomainName}:5432/${postgresDatabaseName}?sslMode=REQUIRE' }
+            { name: 'POSTGRES_USERNAME', value: postgresAdminUsername }
+            { name: 'POSTGRES_PASSWORD', secretRef: 'postgres-password' }
+            { name: 'BLOB_STORAGE_CONNECTION_STRING', secretRef: 'storage-connection-string' }
+            { name: 'BLOB_STORAGE_CONTAINER_NAME', value: blobContainerName }
           ]
         }
       ]

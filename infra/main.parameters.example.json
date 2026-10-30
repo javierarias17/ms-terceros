@@ -15,6 +15,12 @@
     "rutValidationTipoContribuyenteJuridica": { "value": "Persona Jurídica" },
     "azureDocumentIntelligenceMinConfidence": { "value": "0.80" },
     "sendGridFromEmail": { "value": "no-reply@tudominio.com" },
-    "sendGridFromName": { "value": "Universidad El Bosque" }
+    "sendGridFromName": { "value": "Universidad El Bosque" },
+    "dataLocation": { "value": "chilecentral" },
+    "postgresServerName": { "value": "psql-ms-tercero-cl" },
+    "postgresDatabaseName": { "value": "ms_tercero" },
+    "postgresAdminUsername": { "value": "msterceroadmin" },
+    "storageAccountName": { "value": "stmsterocl" },
+    "blobContainerName": { "value": "tercero-documents" }
   }
 }

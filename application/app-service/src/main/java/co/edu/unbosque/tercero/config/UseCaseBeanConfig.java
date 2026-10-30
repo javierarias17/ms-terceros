@@ -2,7 +2,10 @@ package co.edu.unbosque.tercero.config;
 
 import co.edu.unbosque.tercero.domain.ports.IDocumentClassifierGateway;
 import co.edu.unbosque.tercero.domain.ports.IDocumentExtractorGateway;
+import co.edu.unbosque.tercero.domain.ports.IDocumentStorageGateway;
 import co.edu.unbosque.tercero.domain.ports.IEmailNotificationGateway;
+import co.edu.unbosque.tercero.domain.ports.ITerceroRegistrationRepository;
+import co.edu.unbosque.tercero.domain.usecases.FinalizeTerceroRegistrationUseCase;
 import co.edu.unbosque.tercero.domain.usecases.SendRegistrationConfirmationUseCase;
 import co.edu.unbosque.tercero.domain.usecases.ValidateDocumentUseCase;
 import lombok.RequiredArgsConstructor;
@@ -38,5 +41,14 @@ public class UseCaseBeanConfig {
     public SendRegistrationConfirmationUseCase sendRegistrationConfirmationUseCase(
             IEmailNotificationGateway emailNotificationGateway) {
         return new SendRegistrationConfirmationUseCase(emailNotificationGateway);
+    }
+
+    @Bean
+    public FinalizeTerceroRegistrationUseCase finalizeTerceroRegistrationUseCase(
+            IDocumentStorageGateway documentStorageGateway,
+            ITerceroRegistrationRepository terceroRegistrationRepository,
+            SendRegistrationConfirmationUseCase sendRegistrationConfirmationUseCase) {
+        return new FinalizeTerceroRegistrationUseCase(
+                documentStorageGateway, terceroRegistrationRepository, sendRegistrationConfirmationUseCase);
     }
 }

@@ -56,6 +56,28 @@ param sendGridFromEmail string
 @description('Nombre que aparece como remitente en el correo de confirmación.')
 param sendGridFromName string = 'Universidad El Bosque'
 
+@description('Región para PostgreSQL y Storage. Puede ser distinta de "location": belgiumcentral se quedó sin capacidad para el SKU de PostgreSQL (RegionalAllocationFailed), y westus2 está restringida para PostgreSQL específicamente en esta suscripción (aunque sí está permitida para otros recursos) — por eso el valor por defecto es chilecentral.')
+param dataLocation string = 'chilecentral'
+
+@description('Nombre del servidor de PostgreSQL Flexible Server. Debe ser único a nivel global.')
+param postgresServerName string = 'psql-ms-tercero'
+
+@description('Nombre de la base de datos dentro del servidor de PostgreSQL')
+param postgresDatabaseName string = 'ms_tercero'
+
+@description('Usuario administrador de PostgreSQL')
+param postgresAdminUsername string = 'msterceroadmin'
+
+@secure()
+@description('Contraseña del administrador de PostgreSQL. Nunca se guarda en un archivo del repo: se pasa en el momento del despliegue.')
+param postgresAdminPassword string
+
+@description('Nombre de la cuenta de Azure Storage (Blob). Debe ser único a nivel global, solo minúsculas y números.')
+param storageAccountName string
+
+@description('Nombre del contenedor Blob donde se guardan los documentos subidos')
+param blobContainerName string = 'tercero-documents'
+
 resource rg 'Microsoft.Resources/resourceGroups@2024-03-01' = {
   name: resourceGroupName
   location: location
@@ -81,6 +103,13 @@ module appResources 'modules/app-resources.bicep' = {
     sendGridApiKey: sendGridApiKey
     sendGridFromEmail: sendGridFromEmail
     sendGridFromName: sendGridFromName
+    dataLocation: dataLocation
+    postgresServerName: postgresServerName
+    postgresDatabaseName: postgresDatabaseName
+    postgresAdminUsername: postgresAdminUsername
+    postgresAdminPassword: postgresAdminPassword
+    storageAccountName: storageAccountName
+    blobContainerName: blobContainerName
   }
 }
 

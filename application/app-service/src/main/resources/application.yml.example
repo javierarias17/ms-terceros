@@ -7,6 +7,15 @@ spring:
   webflux:
     multipart:
       max-in-memory-size: 10MB
+  # schema.sql crea la tabla tercero_registrations si no existe. "always" porque con R2DBC
+  # (no es una base embebida) Spring Boot no lo corre automáticamente por defecto.
+  sql:
+    init:
+      mode: always
+  r2dbc:
+    url: ${POSTGRES_R2DBC_URL:r2dbc:postgresql://localhost:5432/ms_tercero}
+    username: ${POSTGRES_USERNAME:}
+    password: ${POSTGRES_PASSWORD:}
 
 management:
   endpoints:
@@ -49,3 +58,8 @@ sendgrid:
   api-key: ${SENDGRID_API_KEY:}
   from-email: ${SENDGRID_FROM_EMAIL:}
   from-name: ${SENDGRID_FROM_NAME:Universidad El Bosque}
+
+# Azure Blob Storage — Portal del Storage Account > "Access keys" para la connection string.
+blob-storage:
+  connection-string: ${BLOB_STORAGE_CONNECTION_STRING:}
+  container-name: ${BLOB_STORAGE_CONTAINER_NAME:tercero-documents}
