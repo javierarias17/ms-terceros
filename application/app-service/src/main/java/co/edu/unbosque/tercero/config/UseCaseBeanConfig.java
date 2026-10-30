@@ -6,7 +6,10 @@ import co.edu.unbosque.tercero.domain.ports.IDocumentStorageGateway;
 import co.edu.unbosque.tercero.domain.ports.IEmailNotificationGateway;
 import co.edu.unbosque.tercero.domain.ports.ITerceroRegistrationRepository;
 import co.edu.unbosque.tercero.domain.usecases.FinalizeTerceroRegistrationUseCase;
+import co.edu.unbosque.tercero.domain.usecases.GetTerceroRegistrationUseCase;
+import co.edu.unbosque.tercero.domain.usecases.ListTerceroRegistrationsUseCase;
 import co.edu.unbosque.tercero.domain.usecases.SendRegistrationConfirmationUseCase;
+import co.edu.unbosque.tercero.domain.usecases.UpdateTerceroRegistrationStatusUseCase;
 import co.edu.unbosque.tercero.domain.usecases.ValidateDocumentUseCase;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;
@@ -50,5 +53,25 @@ public class UseCaseBeanConfig {
             SendRegistrationConfirmationUseCase sendRegistrationConfirmationUseCase) {
         return new FinalizeTerceroRegistrationUseCase(
                 documentStorageGateway, terceroRegistrationRepository, sendRegistrationConfirmationUseCase);
+    }
+
+    @Bean
+    public ListTerceroRegistrationsUseCase listTerceroRegistrationsUseCase(
+            ITerceroRegistrationRepository terceroRegistrationRepository) {
+        return new ListTerceroRegistrationsUseCase(terceroRegistrationRepository);
+    }
+
+    @Bean
+    public GetTerceroRegistrationUseCase getTerceroRegistrationUseCase(
+            ITerceroRegistrationRepository terceroRegistrationRepository,
+            IDocumentStorageGateway documentStorageGateway) {
+        return new GetTerceroRegistrationUseCase(terceroRegistrationRepository, documentStorageGateway);
+    }
+
+    @Bean
+    public UpdateTerceroRegistrationStatusUseCase updateTerceroRegistrationStatusUseCase(
+            ITerceroRegistrationRepository terceroRegistrationRepository,
+            IEmailNotificationGateway emailNotificationGateway) {
+        return new UpdateTerceroRegistrationStatusUseCase(terceroRegistrationRepository, emailNotificationGateway);
     }
 }

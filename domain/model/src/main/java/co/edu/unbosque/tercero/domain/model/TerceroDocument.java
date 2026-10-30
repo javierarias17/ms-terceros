@@ -10,7 +10,7 @@ import lombok.Getter;
  * (e.g. "every registration missing a RUT").
  */
 @Getter
-@Builder
+@Builder(toBuilder = true)
 public class TerceroDocument {
 
     private final String id;

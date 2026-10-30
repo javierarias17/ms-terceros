@@ -13,8 +13,13 @@ CREATE TABLE IF NOT EXISTS tercero_registrations (
     celular VARCHAR(30),
     direccion VARCHAR(255),
     estado VARCHAR(20) NOT NULL,
+    motivo_rechazo TEXT,
     fecha_registro TIMESTAMP NOT NULL
 );
+
+-- La tabla ya existía antes de agregar motivo_rechazo (rechazar solicitudes); esto la pone al
+-- día en instalaciones existentes sin perder los datos que ya tenían.
+ALTER TABLE tercero_registrations ADD COLUMN IF NOT EXISTS motivo_rechazo TEXT;
 
 CREATE TABLE IF NOT EXISTS tercero_documents (
     id VARCHAR(36) PRIMARY KEY,

@@ -10,7 +10,7 @@ import lombok.Getter;
  * their documents ended up (Blob Storage URLs) and the record's lifecycle state.
  */
 @Getter
-@Builder
+@Builder(toBuilder = true)
 public class TerceroRegistration {
 
     private final String id;
@@ -28,5 +28,6 @@ public class TerceroRegistration {
     private final String direccion;
     private final List<TerceroDocument> documents;
     private final RegistrationStatus estado;
+    private final String motivoRechazo;
     private final Instant fechaRegistro;
 }

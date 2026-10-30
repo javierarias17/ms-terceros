@@ -44,6 +44,8 @@ public class TerceroRegistrationEntity implements Persistable<String> {
     private String celular;
     private String direccion;
     private String estado;
+    @Column("motivo_rechazo")
+    private String motivoRechazo;
     @Column("fecha_registro")
     private Instant fechaRegistro;
 

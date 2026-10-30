@@ -1,6 +1,7 @@
 package co.edu.unbosque.tercero.domain.ports;
 
 import co.edu.unbosque.tercero.domain.model.RegistrationNotificationRequest;
+import co.edu.unbosque.tercero.domain.model.TerceroRegistration;
 import reactor.core.publisher.Mono;
 
 /**
@@ -11,4 +12,11 @@ import reactor.core.publisher.Mono;
 public interface IEmailNotificationGateway {
 
     Mono<Void> sendRegistrationConfirmation(RegistrationNotificationRequest request);
+
+    /**
+     * Notifies the applicant that their registration was approved or rejected. Reads
+     * {@code registration.getEstado()} (and {@code motivoRechazo} when rejected) to pick the
+     * right template.
+     */
+    Mono<Void> sendStatusUpdate(TerceroRegistration registration);
 }

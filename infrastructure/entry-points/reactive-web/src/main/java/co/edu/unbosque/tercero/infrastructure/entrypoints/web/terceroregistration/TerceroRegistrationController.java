@@ -1,8 +1,14 @@
 package co.edu.unbosque.tercero.infrastructure.entrypoints.web.terceroregistration;
 
+import co.edu.unbosque.tercero.domain.model.RegistrationStatus;
+import co.edu.unbosque.tercero.domain.model.TerceroDocument;
 import co.edu.unbosque.tercero.domain.model.TerceroDocumentFile;
+import co.edu.unbosque.tercero.domain.model.TerceroRegistration;
 import co.edu.unbosque.tercero.domain.model.TerceroRegistrationRequest;
 import co.edu.unbosque.tercero.domain.usecases.FinalizeTerceroRegistrationUseCase;
+import co.edu.unbosque.tercero.domain.usecases.GetTerceroRegistrationUseCase;
+import co.edu.unbosque.tercero.domain.usecases.ListTerceroRegistrationsUseCase;
+import co.edu.unbosque.tercero.domain.usecases.UpdateTerceroRegistrationStatusUseCase;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -28,6 +34,9 @@ public class TerceroRegistrationController implements TerceroRegistrationApi {
             "fechaExpedicionCedula", "lugarNacimiento", "paisNacimiento", "nit", "celular", "direccion");
 
     private final FinalizeTerceroRegistrationUseCase finalizeTerceroRegistrationUseCase;
+    private final ListTerceroRegistrationsUseCase listTerceroRegistrationsUseCase;
+    private final GetTerceroRegistrationUseCase getTerceroRegistrationUseCase;
+    private final UpdateTerceroRegistrationStatusUseCase updateTerceroRegistrationStatusUseCase;
 
     @Override
     public Mono<TerceroRegistrationResponseDto> register(ServerWebExchange exchange) {
@@ -35,6 +44,91 @@ public class TerceroRegistrationController implements TerceroRegistrationApi {
                 .flatMap(this::toRequest)
                 .flatMap(finalizeTerceroRegistrationUseCase::execute)
                 .map(registration -> new TerceroRegistrationResponseDto(registration.getId(), registration.getEstado().name()));
+    }
+
+    @Override
+    public Flux<TerceroRegistrationSummaryDto> list(String estado) {
+        return listTerceroRegistrationsUseCase.execute(parseEstado(estado)).map(this::toSummaryDto);
+    }
+
+    @Override
+    public Mono<TerceroRegistrationDetailDto> getById(String id) {
+        return getTerceroRegistrationUseCase.execute(id).map(this::toDetailDto);
+    }
+
+    @Override
+    public Mono<TerceroRegistrationDetailDto> approve(String id) {
+        return updateTerceroRegistrationStatusUseCase.execute(id, RegistrationStatus.APROBADO, null)
+                .map(this::toDetailDto);
+    }
+
+    @Override
+    public Mono<TerceroRegistrationDetailDto> reject(String id, RejectRequestDto request) {
+        if (request == null || request.motivo() == null || request.motivo().isBlank()) {
+            throw new IllegalArgumentException("motivo es obligatorio para rechazar una solicitud");
+        }
+        return updateTerceroRegistrationStatusUseCase.execute(id, RegistrationStatus.RECHAZADO, request.motivo())
+                .map(this::toDetailDto);
+    }
+
+    private RegistrationStatus parseEstado(String raw) {
+        if (raw == null || raw.isBlank()) {
+            return null;
+        }
+        try {
+            return RegistrationStatus.valueOf(raw.trim().toUpperCase());
+        } catch (IllegalArgumentException ex) {
+            throw new IllegalArgumentException("estado debe ser REGISTRADO, APROBADO o RECHAZADO");
+        }
+    }
+
+    private TerceroRegistrationSummaryDto toSummaryDto(TerceroRegistration registration) {
+        String numeroIdentificacion = "Juridica".equalsIgnoreCase(registration.getTipoPersona())
+                && registration.getNit() != null && !registration.getNit().isBlank()
+                ? registration.getNit()
+                : registration.getCedula();
+
+        return new TerceroRegistrationSummaryDto(
+                registration.getId(),
+                registration.getCalidad(),
+                registration.getTipoPersona(),
+                registration.getNombre(),
+                numeroIdentificacion,
+                registration.getEstado().name(),
+                registration.getFechaRegistro().toString());
+    }
+
+    private TerceroRegistrationDetailDto toDetailDto(TerceroRegistration registration) {
+        List<TerceroDocumentDto> documents = registration.getDocuments().stream()
+                .map(this::toDocumentDto)
+                .toList();
+
+        return new TerceroRegistrationDetailDto(
+                registration.getId(),
+                registration.getCalidad(),
+                registration.getNacionalidad(),
+                registration.getTipoPersona(),
+                registration.getCorreo(),
+                registration.getNombre(),
+                registration.getCedula(),
+                registration.getFechaExpedicionCedula(),
+                registration.getLugarNacimiento(),
+                registration.getPaisNacimiento(),
+                registration.getNit(),
+                registration.getCelular(),
+                registration.getDireccion(),
+                registration.getEstado().name(),
+                registration.getMotivoRechazo(),
+                registration.getFechaRegistro().toString(),
+                documents);
+    }
+
+    private TerceroDocumentDto toDocumentDto(TerceroDocument document) {
+        return new TerceroDocumentDto(
+                document.getDocumentKey(),
+                document.getFileName(),
+                document.getUrl(),
+                document.getUploadedAt().toString());
     }
 
     private Mono<TerceroRegistrationRequest> toRequest(MultiValueMap<String, Part> parts) {
